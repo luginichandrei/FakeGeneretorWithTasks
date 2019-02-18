@@ -1,33 +1,37 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FakeGeneratorWithTasks
 {
     public class TextReader
     {
-        public async Task ReadText(int fileNumber)
+        private readonly object locker = new object();
+
+        public IEnumerable<User> ReadText(int fileNumber)
         {
             string line;
-            var users = new List<User>();
             using (StreamReader sr = File.OpenText(@"C:\File" + fileNumber + ".txt"))
             {
-                while ((line = await sr.ReadLineAsync()) != null)
+                while ((line = sr.ReadLine()) != null)
                 {
-                    string[] item = line.Split(',');
-                    var user = new User()
-                    {
-                        Id = int.Parse(item[0].Split(':').Last()),
-                        FirstName = item[1].Split(':').Last(),
-                        LastName = item[2].Split(':').Last(),
-                        BirthDate = DateTime.Parse(item[3].Split('/').Last()),
-                        Salary = decimal.Parse(item[4].Split(':').Last() + "," + item[5].Split(':').Last())
-                    };
+                    //var user = line.GetUserFromFileExt();
+                    //Console.WriteLine("File №" + fileNumber + " Id:" + user.Id + ",FirstName:" + user.FirstName + ",LastName:" + user.LastName + ",BirthDate:" + user.BirthDate + ",Salary:" + user.Salary);
+                    yield return line.GetUserFromFileExt();
+                }
+            }
+        }
 
-                    users.Add(user);
-                    Console.WriteLine("File №" + fileNumber + " Id:" + user.Id + ",FirstName:" + user.FirstName + ",LastName:" + user.LastName + ",BirthDate:" + user.BirthDate + ",Salary:" + user.Salary);
+        public void ReadText(int fileNumber, BlockingCollection<User> users)
+        {
+            Console.WriteLine("Reader: Thread Id {0}, index: {1}", System.Threading.Thread.CurrentThread.ManagedThreadId, fileNumber);
+            string line;
+            using (StreamReader sr = File.OpenText(@"C:\File" + fileNumber + ".txt"))
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    users.Add(line.GetUserFromFileExt());
                 }
             }
         }

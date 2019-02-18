@@ -49,9 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FakeListUsers.cs" />
+    <Compile Include="MyExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextReader.cs" />
+    <Compile Include="TextReaderAsync.cs" />
     <Compile Include="TextWritter.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
